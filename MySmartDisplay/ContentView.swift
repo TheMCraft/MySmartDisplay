@@ -13,9 +13,6 @@ struct ContentView: View {
 
     @State private var connected = false
     @State var connectedTo: Peripheral?
-    @State private var cRed: Double = 0
-    @State private var cGreen: Double = 0
-    @State private var cBlue: Double = 0
     @State private var selCommand = "Befehl Auswählen"
     let commands = ["delay:300", "delay:150", "d", "blink:off", "blink:on", "led:off", "run:off", "run:on", "led:on", "light:off", "light:on"]
     @State private var commandSent = false
@@ -43,14 +40,14 @@ struct ContentView: View {
                         }
                     }.onAppear {
                         bleManager.startScanning()
-                    }
+                    }.backgroundStyle(Color("backgroundColor"))
                     
                 } else {
                     Spacer()
                     Spacer()
                     Spacer()
                     ZStack {
-                        RoundedRectangle(cornerRadius: 10).fill(.white).frame(height: 60).padding(.horizontal)
+                        RoundedRectangle(cornerRadius: 10).fill(Color("contrastColor")).frame(height: 60).padding(.horizontal)
                         HStack {
                             Text("Connected to Device:\n" + (connectedTo?.name ?? "Unknown"))
                             ZStack {
@@ -71,24 +68,27 @@ struct ContentView: View {
                     Spacer()
                     ZStack {
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(red: cRed/255, green: cGreen/255, blue: cBlue/255))
+                            .fill(Color("contrastColor"))
+                            .frame(height: 204).padding(.horizontal)
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(red: bleManager.cRed/255, green: bleManager.cGreen/255, blue: bleManager.cBlue/255))
                             .frame(height: 200).padding(.horizontal)
                         VStack {
                             Spacer()
-                            Text("Farbe Ändern").font(.title2).foregroundColor(Color(red: cRed/255, green: cGreen/255, blue: cBlue/255)).bold().colorInvert()
+                            Text("Farbe Ändern").font(.title2).foregroundColor(Color(red: bleManager.cRed/255, green: bleManager.cGreen/255, blue: bleManager.cBlue/255)).bold().colorInvert()
                             Spacer()
-                            Slider(value: $cRed, in: 0...255).accentColor(.red).padding(.horizontal).padding(.horizontal).onChange(of: cRed) {
-                                let data = ("r:" + String(cRed)).data(using: .utf8)!
+                            Slider(value: $bleManager.cRed, in: 0...255).accentColor(.red).padding(.horizontal).padding(.horizontal).onChange(of: bleManager.cRed) {
+                                let data = ("r:" + String(bleManager.cRed)).data(using: .utf8)!
                                 bleManager.writeToCharacteristic(value: data)
                                 print("sent color")
                             }
-                            Slider(value: $cGreen, in: 0...255).accentColor(.green).padding(.horizontal).padding(.horizontal).onChange(of: cGreen) {
-                                let data = ("g:" + String(cGreen)).data(using: .utf8)!
+                            Slider(value: $bleManager.cGreen, in: 0...255).accentColor(.green).padding(.horizontal).padding(.horizontal).onChange(of: bleManager.cGreen) {
+                                let data = ("g:" + String(bleManager.cGreen)).data(using: .utf8)!
                                 bleManager.writeToCharacteristic(value: data)
                                 print("sent color")
                             }
-                            Slider(value: $cBlue, in: 0...255).accentColor(.blue).padding(.horizontal).padding(.horizontal).onChange(of: cBlue) {
-                                let data = ("b:" + String(cBlue)).data(using: .utf8)!
+                            Slider(value: $bleManager.cBlue, in: 0...255).accentColor(.blue).padding(.horizontal).padding(.horizontal).onChange(of: bleManager.cBlue) {
+                                let data = ("b:" + String(bleManager.cBlue)).data(using: .utf8)!
                                 bleManager.writeToCharacteristic(value: data)
                                 print("sent color")
                             }
@@ -100,11 +100,10 @@ struct ContentView: View {
                     if (!commandSent) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 10)
-                                .fill(.white)
+                                .fill(Color("contrastColor"))
                                 .frame(height: 200).padding(.horizontal)
                             VStack {
                                 Spacer()
-                                Text("Befehl Senden").font(.title2).foregroundColor(.white)
                                 Text("Befehle").font(.title2).frame(alignment: .top).foregroundColor(Color(red: 158/255, green: 9/255, blue: 46/255)).bold().onTapGesture(count: 10) {
                                     showPrompt = true
                                 }
@@ -122,7 +121,7 @@ struct ContentView: View {
                                                 Text(selCommand)
                                                 Image(systemName: "filemenu.and.selection")
                                                     .imageScale(.small)
-                                                    .foregroundStyle(.tint).foregroundColor(.white)
+                                                    .foregroundStyle(.tint).foregroundColor(Color("contrastColor"))
                                             }
                                         }
                                     }
@@ -144,10 +143,10 @@ struct ContentView: View {
                                                 commandSent = true
                                                 log += selCommand + "\n";
                                                 while (commandSent) {
-                                                    try await Task.sleep(nanoseconds: 10_000_000)
-                                                    planeString += "."
+                                                    try await Task.sleep(nanoseconds: 20_000_000)
+                                                    planeString += " "
                                                     spaceCount = spaceCount + 1
-                                                    if (spaceCount >= 90) {
+                                                    if (spaceCount >= 27) {
                                                         commandSent = false
                                                         spaceCount = 0
                                                         planeString = ""
@@ -173,15 +172,15 @@ struct ContentView: View {
                                 HStack {
                                     Text(planeString).foregroundStyle(.blue)
                                     Image(systemName: "airplane")
-                                        .imageScale(.large).foregroundColor(.white)
+                                        .imageScale(.large).foregroundColor(Color("contrastColor"))
                                 }.frame(maxWidth: .infinity, alignment: .leading)
-                                Text("Befehl wird gesendet...").foregroundColor(.white)
+                                Text("Befehl wird gesendet...").foregroundColor(Color("contrastColor"))
                             }
                         }
                     }
                     Spacer()
                     ZStack {
-                        RoundedRectangle(cornerRadius: 10).fill(.white).frame(height: 200).padding(.horizontal)
+                        RoundedRectangle(cornerRadius: 10).fill(Color("contrastColor")).frame(height: 200).padding(.horizontal)
                         VStack {
                             Text("Logs").font(.title2).frame(alignment: .top).foregroundColor(Color(red: 158/255, green: 9/255, blue: 46/255)).bold().padding(15)
                             ScrollView {
@@ -205,7 +204,7 @@ struct ContentView: View {
                         .padding()
                         Spacer()
                     }
-                    .background(Color.white) // Hintergrund der Eingabe
+                    .background(Color("contrastColor")) // Hintergrund der Eingabe
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .edgesIgnoringSafeArea(.all)
                 }
@@ -221,6 +220,9 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeriph
     let serviceUUIDs: [CBUUID] = [CBUUID(string: "4fafc201-1fb5-459e-8fcc-c5c9c331914b")]
     var writableCharacteristic: CBCharacteristic?
     var connectedPeripheral: CBPeripheral?
+    @Published var cRed: Double = 0
+    @Published var cGreen: Double = 0
+    @Published var cBlue: Double = 0
 
 
 
@@ -231,6 +233,7 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeriph
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
+            peripherals = []
             startScanning()
         } else {
             print("Warte auf .poweredOn Zustand...")
@@ -301,15 +304,33 @@ class BLEManager: NSObject, ObservableObject, CBCentralManagerDelegate, CBPeriph
         for characteristic in characteristics {
             if characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse) {
                 writableCharacteristic = characteristic
+                peripheral.setNotifyValue(true, for: writableCharacteristic!)
+                writeToCharacteristic(value: String("get:config").data(using: .utf8)!)
+                peripheral.readValue(for: writableCharacteristic!)
             }
         }
     }
 
 
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        if (characteristic.uuid == writableCharacteristic!.uuid) {
+            if let value = String(data: characteristic.value ?? Data(), encoding: .utf8)
+            {
+                print(value)
+                let numbers = value.split(separator: ";")
+                if numbers.count >= 9 {
+                    cRed = Double(numbers[5]) ?? 0
+                    cGreen = Double(numbers[6]) ?? 0
+                    cBlue = Double(numbers[7]) ?? 0
+                }
+            }
+        }
+    }
+    
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         if let name = peripheral.name {
             let newPeripheral = Peripheral(id: peripheral.identifier, name: name, peripheral: peripheral)
-            if !peripherals.contains(where: { $0.id == newPeripheral.id }) {
+            if !peripherals.contains(where: { $0.name == newPeripheral.name }) {
                 DispatchQueue.main.async {
                     self.peripherals.append(newPeripheral)
                 }

@@ -11,7 +11,7 @@ import SwiftUI
 struct MySmartDisplayApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView().background(Color(red: 242/255, green: 242/255, blue: 247/255))
+            ContentView().background(Color("backgroundColor"))
         }
     }
 }
