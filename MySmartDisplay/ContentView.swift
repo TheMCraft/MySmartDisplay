@@ -27,24 +27,38 @@ struct ContentView: View {
             VStack {
                 ZStack {
                     Rectangle().frame(height: 50).foregroundColor(Color(red: 158/255, green: 9/255, blue: 46/255))
-                    Text("MySmartDisplay").font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/).foregroundColor(.white)
-                }
-                if (connectedTo == nil) {
-                    Spacer()
-                    Spacer()
-                    Text("Verbinde dich mit deinem MySmartDisplay...").foregroundColor(.red)
-                    List(bleManager.peripherals) { peripheral in
-                        Text(peripheral.name).onTapGesture {
-                            self.connectedTo = peripheral
-                            self.bleManager.connectToPeripheral(peripheral: peripheral.peripheral)
-                        }
-                    }.onAppear {
-                        bleManager.startScanning()
-                    }.backgroundStyle(Color("backgroundColor"))
+                    Text("My Smart Display").font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/).foregroundColor(.white)
+                }.frame(alignment: .top)
+                if (connectedTo == nil && spaceCount != 100000) {
+                    Text("Verbinde dich mit deinem My Smart Display...").foregroundColor(.red).onTapGesture(count: 10) {
+
+                                spaceCount = 100000;
+
+                    }
+                    if (bleManager.peripherals.count != 0) {
+                        List(bleManager.peripherals) { peripheral in
+                            Text(peripheral.name).onTapGesture {
+                                self.connectedTo = peripheral
+                                self.bleManager.connectToPeripheral(peripheral: peripheral.peripheral)
+                            }
+                        }.backgroundStyle(Color("backgroundColor"))
+                    } else {
+                        Spacer()
+                        Spacer()
+                        Spacer()
+                        Spacer()
+                        Text("Suche nach My Smart Displays in deiner Nähe...").font(.title3)
+                        ProgressView()
+                              .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                              .scaleEffect(2.0, anchor: .center)
+                              .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                }
+                                bleManager.startScanning()
+                              }
+                    }
                     
                 } else {
-                    Spacer()
-                    Spacer()
                     Spacer()
                     ZStack {
                         RoundedRectangle(cornerRadius: 10).fill(Color("contrastColor")).frame(height: 60).padding(.horizontal)
@@ -60,11 +74,9 @@ struct ContentView: View {
                         }
                     }
                     Spacer()
-                    Spacer()
-                    Spacer()
                     
                 }
-                if (connectedTo != nil) {
+                if (connectedTo != nil || spaceCount == 100000) {
                     Spacer()
                     ZStack {
                         RoundedRectangle(cornerRadius: 10)
@@ -124,11 +136,11 @@ struct ContentView: View {
                                                     .foregroundStyle(.tint).foregroundColor(Color("contrastColor"))
                                             }
                                         }
-                                    }
+                                    }.tint(.black)
                                     Button(action: {
                                         selCommand = "Befehl Auswählen"
                                     }) {
-                                        Image(systemName: "x.circle").foregroundColor(.blue)
+                                        Image(systemName: "x.circle").foregroundColor(.black)
                                     }
                                 }
                                 Spacer()
@@ -180,14 +192,14 @@ struct ContentView: View {
                     }
                     Spacer()
                     ZStack {
-                        RoundedRectangle(cornerRadius: 10).fill(Color("contrastColor")).frame(height: 200).padding(.horizontal)
+                        RoundedRectangle(cornerRadius: 10).fill(Color("contrastColor")).padding(.horizontal).frame(maxWidth: .infinity)
                         VStack {
                             Text("Logs").font(.title2).frame(alignment: .top).foregroundColor(Color(red: 158/255, green: 9/255, blue: 46/255)).bold().padding(15)
                             ScrollView {
                                 Text(log).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).padding(.horizontal).padding(.horizontal).foregroundColor(Color(red: 158/255, green: 9/255, blue: 46/255))
                             }
-                        }
-                    }
+                        }.frame(maxHeight: .infinity)
+                    }.frame(maxHeight: .infinity)
                 }
             }
                 if showPrompt {
@@ -197,7 +209,7 @@ struct ContentView: View {
                         TextField("Prompt eingeben", text: $selCommand)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding()
-                        Button("Submit") {
+                            Button("Submit") {
                             // Hier Logik nach dem Klicken
                             showPrompt = false // Eingabefeld ausblenden
                         }
@@ -208,9 +220,7 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .edgesIgnoringSafeArea(.all)
                 }
-        }
-        Spacer()
-        .padding()
+        }.frame(maxHeight: .infinity)
     }
 }
 
