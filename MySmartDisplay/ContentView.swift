@@ -57,6 +57,10 @@ struct ContentView: View {
                                 bleManager.startScanning()
                               }.tint(.black)
                         Spacer()
+                        Spacer()
+                        Spacer()
+                        Spacer()
+                        Spacer()
                     }
                     
                 } else {
