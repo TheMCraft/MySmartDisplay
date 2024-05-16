@@ -55,7 +55,7 @@ struct ContentView: View {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                                 }
                                 bleManager.startScanning()
-                              }.tint(.black)
+                              }.colorInvert()
                         Spacer()
                         Spacer()
                         Spacer()
